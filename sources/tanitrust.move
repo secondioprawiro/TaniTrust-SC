@@ -27,6 +27,7 @@ module tanitrust::marketplace {
 
     // ==================== DISPUTE STATUS ====================
     const DISPUTE_STATUS_PENDING: u8 = 0;
+    const DISPUTE_STATUS_RESOLVED: u8 = 1;
 
     // ==================== STRUCTS ====================
 
@@ -382,7 +383,7 @@ module tanitrust::marketplace {
 
     /// Accept compensation and resolve dispute - distributes TATO
     entry fun accept_compensation(
-        dispute: Dispute,
+        dispute: &mut Dispute,
         order: Order,
         ctx: &mut TxContext
     ) {
@@ -400,18 +401,13 @@ module tanitrust::marketplace {
         let order_id = object::uid_to_inner(&order.id);
         assert!(dispute.order_id == order_id, E_INVALID_ORDER);
 
-        let Dispute {
-            id: dispute_id,
-            order_id: _order_id,
-            buyer,
-            farmer,
-            total_amount: _,
-            farmer_percentage,
-            buyer_percentage: _,
-            status: _,
-            votes_for: _,
-            votes_against: _,
-        } = dispute;
+        // Mark dispute as resolved
+        dispute.status = DISPUTE_STATUS_RESOLVED;
+
+        let dispute_id = object::uid_to_inner(&dispute.id);
+        let buyer = dispute.buyer;
+        let farmer = dispute.farmer;
+        let farmer_percentage = dispute.farmer_percentage;
 
         let Order {
             id: order_obj_id,
@@ -447,13 +443,12 @@ module tanitrust::marketplace {
         };
 
         event::emit(DisputeResolvedEvent {
-            dispute_id: object::uid_to_inner(&dispute_id),
-            order_id: _order_id,
+            dispute_id,
+            order_id,
             farmer_amount,
             buyer_amount,
         });
 
-        object::delete(dispute_id);
         object::delete(order_obj_id);
     }
 

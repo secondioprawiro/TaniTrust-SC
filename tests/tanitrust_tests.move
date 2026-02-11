@@ -581,10 +581,11 @@ module tanitrust::marketplace_tato_tests {
         
         ts::next_tx(&mut scenario, BUYER);
         {
-            let dispute = ts::take_shared<Dispute>(&scenario);
+            let mut dispute = ts::take_shared<Dispute>(&scenario);
             let order = ts::take_from_sender<Order>(&scenario);
             
-            marketplace::accept_compensation(dispute, order, ts::ctx(&mut scenario));
+            marketplace::accept_compensation(&mut dispute, order, ts::ctx(&mut scenario));
+            ts::return_shared(dispute);
         };
         
         let farmer_expected = (payment_amount * 70) / 100;

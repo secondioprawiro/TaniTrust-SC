@@ -9,9 +9,9 @@ Decentralized Agricultural Marketplace on Sui using **TATO tokens**.
 ```typescript
 export const TANITRUST_CONFIG = {
   NETWORK: 'testnet',
-  PACKAGE_ID: '0x0a9e26ba0f2084e14e1c383704ee0f9460cb5772999e1c986f2fdd86079436c0',
-  TREASURY_CAP_HOLDER: '0x921ddac4d21d3d4f0db83dabf0c72eba0ff4b13af03151506116130f84f12e5e',
-  TATO_COIN_TYPE: '0x0a9e26ba0f2084e14e1c383704ee0f9460cb5772999e1c986f2fdd86079436c0::tani_token::TANI_TOKEN',
+  PACKAGE_ID: '0x49baa0988a11ca9c4e40216b826fd19d86af3f427459408a6720e7c6fad2bd15',
+  TREASURY_CAP_HOLDER: '0xe0857d41cb5e88091fca3fd22ba3e333746950cbe7bbbb1f7870db502d725b9f',
+  TATO_COIN_TYPE: '0x49baa0988a11ca9c4e40216b826fd19d86af3f427459408a6720e7c6fad2bd15::tani_token::TANI_TOKEN',
   CLOCK_OBJECT: '0x6', // Sui system clock
 };
 ```
@@ -26,7 +26,7 @@ export const TANITRUST_CONFIG = {
 
 ---
 
-## � Smart Contract Functions
+## 📋 Smart Contract Functions
 
 ### Token Functions
 
@@ -110,6 +110,7 @@ tx.moveCall({
   target: `${PACKAGE_ID}::marketplace::create_dispute`,
   arguments: [tx.object(orderId)],
 });
+// Note: Dispute is now a SHARED object
 ```
 
 #### Propose Compensation
@@ -117,7 +118,7 @@ tx.moveCall({
 tx.moveCall({
   target: `${PACKAGE_ID}::marketplace::propose_compensation`,
   arguments: [
-    tx.object(disputeId),
+    tx.object(disputeId), // Shared object
     tx.pure(70),  // farmer_percentage
     tx.pure(30),  // buyer_percentage
   ],
@@ -130,11 +131,12 @@ tx.moveCall({
   target: `${PACKAGE_ID}::marketplace::accept_compensation`,
   arguments: [tx.object(disputeId), tx.object(orderId)],
 });
+// Note: Requires mutable reference to shared Dispute object
 ```
 
 ---
 
-## � View Functions
+## 📖 View Functions
 
 ```typescript
 // Get product info
@@ -160,6 +162,6 @@ sui move test
 
 ---
 
-## � Explorer
+## 🔗 Explorer
 
-[View on Sui Explorer](https://suiexplorer.com/object/0x0a9e26ba0f2084e14e1c383704ee0f9460cb5772999e1c986f2fdd86079436c0?network=testnet)
+[View on Sui Explorer](https://suiexplorer.com/object/0x49baa0988a11ca9c4e40216b826fd19d86af3f427459408a6720e7c6fad2bd15?network=testnet)
