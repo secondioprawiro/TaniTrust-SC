@@ -169,6 +169,28 @@ module tanitrust::marketplace {
         product.stock = new_stock;
     }
 
+    /// Menghapus produk dari marketplace
+    entry fun delete_product(
+        product: Product, 
+        ctx: &TxContext
+    ) {
+        // 1. Cek apakah pengirim transaksi adalah petani pemilik produk
+        assert!(product.farmer == tx_context::sender(ctx), E_NOT_FARMER);
+
+        // 2. Unpack (bongkar) struct Product untuk mengambil ID-nya
+        // Variabel yang tidak dipakai diberi nama _ (underscore)
+        let Product { 
+            id, 
+            name: _, 
+            price_per_unit: _, 
+            stock: _, 
+            farmer: _ 
+        } = product;
+
+        // 3. Hapus objek secara permanen
+        object::delete(id);
+    }
+
     // ==================== BUYER FUNCTIONS ====================
 
     /// Create order with TATO payment

@@ -136,6 +136,134 @@ module tanitrust::marketplace_tato_tests {
         ts::end(scenario);
     }
 
+    #[test]
+    fun test_delete_product_success() {
+        let mut scenario = start_test();
+        
+        ts::next_tx(&mut scenario, FARMER);
+        {
+            marketplace::init_for_testing(ts::ctx(&mut scenario));
+        };
+        
+        // Farmer uploads product
+        ts::next_tx(&mut scenario, FARMER);
+        {
+            marketplace::upload_product(
+                string::utf8(b"Organic Rice"),
+                PRODUCT_PRICE,
+                PRODUCT_STOCK,
+                ts::ctx(&mut scenario)
+            );
+        };
+        
+        // Farmer deletes the product
+        ts::next_tx(&mut scenario, FARMER);
+        {
+            let product = ts::take_shared<Product>(&scenario);
+            marketplace::delete_product(product, ts::ctx(&mut scenario));
+        };
+        
+        // Verify product no longer exists
+        ts::next_tx(&mut scenario, FARMER);
+        {
+            assert!(!ts::has_most_recent_shared<Product>(), 0);
+        };
+        
+        ts::end(scenario);
+    }
+
+    #[test]
+    #[expected_failure(abort_code = marketplace::E_NOT_FARMER)]
+    fun test_delete_product_not_owner() {
+        let mut scenario = start_test();
+        
+        ts::next_tx(&mut scenario, FARMER);
+        {
+            marketplace::init_for_testing(ts::ctx(&mut scenario));
+        };
+        
+        // Farmer uploads product
+        ts::next_tx(&mut scenario, FARMER);
+        {
+            marketplace::upload_product(
+                string::utf8(b"Organic Rice"),
+                PRODUCT_PRICE,
+                PRODUCT_STOCK,
+                ts::ctx(&mut scenario)
+            );
+        };
+        
+        // Random user tries to delete (should fail)
+        ts::next_tx(&mut scenario, RANDOM);
+        {
+            let product = ts::take_shared<Product>(&scenario);
+            marketplace::delete_product(product, ts::ctx(&mut scenario));
+        };
+        
+        ts::end(scenario);
+    }
+
+    #[test]
+    fun test_delete_product_multiple_products() {
+        let mut scenario = start_test();
+        
+        ts::next_tx(&mut scenario, FARMER);
+        {
+            marketplace::init_for_testing(ts::ctx(&mut scenario));
+        };
+        
+        // Farmer uploads first product
+        ts::next_tx(&mut scenario, FARMER);
+        {
+            marketplace::upload_product(
+                string::utf8(b"Organic Rice"),
+                PRODUCT_PRICE,
+                PRODUCT_STOCK,
+                ts::ctx(&mut scenario)
+            );
+        };
+        
+        // Farmer uploads second product
+        ts::next_tx(&mut scenario, FARMER);
+        {
+            marketplace::upload_product(
+                string::utf8(b"Organic Corn"),
+                PRODUCT_PRICE * 2,
+                PRODUCT_STOCK / 2,
+                ts::ctx(&mut scenario)
+            );
+        };
+        
+        // Delete first product only
+        ts::next_tx(&mut scenario, FARMER);
+        {
+            let product1 = ts::take_shared<Product>(&scenario);
+            let (name, _, _, _) = marketplace::get_product_info(&product1);
+            
+            // Make sure we're deleting the Rice product
+            if (name == string::utf8(b"Organic Rice")) {
+                marketplace::delete_product(product1, ts::ctx(&mut scenario));
+            } else {
+                ts::return_shared(product1);
+            };
+        };
+        
+        // Verify second product still exists
+        ts::next_tx(&mut scenario, FARMER);
+        {
+            let product2 = ts::take_shared<Product>(&scenario);
+            let (name, price, stock, farmer) = marketplace::get_product_info(&product2);
+            
+            // Should be the Corn product
+            assert!(name == string::utf8(b"Organic Corn") || name == string::utf8(b"Organic Rice"), 0);
+            assert!(farmer == FARMER, 1);
+            
+            ts::return_shared(product2);
+        };
+        
+        ts::end(scenario);
+    }
+
     // ==================== ORDER TESTS WITH TATO ====================
 
     #[test]
