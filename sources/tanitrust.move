@@ -38,6 +38,7 @@ module tanitrust::marketplace {
         price_per_unit: u64, // Price in TATO (smallest units)
         stock: u64,
         farmer: address,
+        fulfillment_time: u64, // Fulfillment time in hours
     }
 
     /// Order with escrow (Owned Object)
@@ -80,6 +81,7 @@ module tanitrust::marketplace {
         name: String,
         price: u64,
         stock: u64,
+        fulfillment_time: u64,
     }
 
     public struct OrderCreatedEvent has copy, drop {
@@ -135,6 +137,7 @@ module tanitrust::marketplace {
         name: String,
         price_per_unit: u64, // Price in TATO smallest units
         stock: u64,
+        fulfillment_time: u64, // Duration in hours
         ctx: &mut TxContext
     ) {
         let farmer = tx_context::sender(ctx);
@@ -147,6 +150,7 @@ module tanitrust::marketplace {
             price_per_unit,
             stock,
             farmer,
+            fulfillment_time,
         };
 
         event::emit(ProductListedEvent {
@@ -155,6 +159,7 @@ module tanitrust::marketplace {
             name,
             price: price_per_unit,
             stock,
+            fulfillment_time,
         });
 
         transfer::share_object(product);
@@ -185,7 +190,8 @@ module tanitrust::marketplace {
             name: _, 
             price_per_unit: _, 
             stock: _, 
-            farmer: _ 
+            farmer: _,
+            fulfillment_time: _
         } = product;
 
         // 3. Hapus objek secara permanen
@@ -198,7 +204,7 @@ module tanitrust::marketplace {
     entry fun create_order(
         product: &mut Product,
         quantity: u64,
-        deadline_hours: u64,
+        // deadline_hours removed, using product.fulfillment_time
         payment: Coin<TANI_TOKEN>, // Payment in TATO!
         clock: &Clock,
         ctx: &mut TxContext
@@ -213,8 +219,9 @@ module tanitrust::marketplace {
         let payment_balance = coin::into_balance(payment);
         product.stock = product.stock - quantity;
         
+        
         let current_time = clock::timestamp_ms(clock);
-        let deadline = current_time + (deadline_hours * 3600 * 1000);
+        let deadline = current_time + (product.fulfillment_time * 3600 * 1000);
         
         let order_uid = object::new(ctx);
         let order_id = object::uid_to_inner(&order_uid);
@@ -469,8 +476,8 @@ module tanitrust::marketplace {
 
     // ==================== VIEW FUNCTIONS ====================
 
-    public fun get_product_info(product: &Product): (String, u64, u64, address) {
-        (product.name, product.price_per_unit, product.stock, product.farmer)
+    public fun get_product_info(product: &Product): (String, u64, u64, address, u64) {
+        (product.name, product.price_per_unit, product.stock, product.farmer, product.fulfillment_time)
     }
 
     public fun get_order_status(order: &Order): u8 {

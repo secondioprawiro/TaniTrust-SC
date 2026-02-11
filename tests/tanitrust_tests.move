@@ -116,6 +116,7 @@ module tanitrust::marketplace_tato_tests {
                 string::utf8(b"Organic Rice"),
                 PRODUCT_PRICE, // Price in TATO
                 PRODUCT_STOCK,
+                DEADLINE_HOURS, // Fulfillment time
                 ts::ctx(&mut scenario)
             );
         };
@@ -123,12 +124,13 @@ module tanitrust::marketplace_tato_tests {
         ts::next_tx(&mut scenario, FARMER);
         {
             let product = ts::take_shared<Product>(&scenario);
-            let (name, price, stock, farmer) = marketplace::get_product_info(&product);
+            let (name, price, stock, farmer, fulfillment) = marketplace::get_product_info(&product);
             
             assert!(name == string::utf8(b"Organic Rice"), 0);
             assert!(price == PRODUCT_PRICE, 1);
             assert!(stock == PRODUCT_STOCK, 2);
             assert!(farmer == FARMER, 3);
+            assert!(fulfillment == DEADLINE_HOURS, 4);
             
             ts::return_shared(product);
         };
@@ -152,6 +154,7 @@ module tanitrust::marketplace_tato_tests {
                 string::utf8(b"Organic Rice"),
                 PRODUCT_PRICE,
                 PRODUCT_STOCK,
+                DEADLINE_HOURS,
                 ts::ctx(&mut scenario)
             );
         };
@@ -189,6 +192,7 @@ module tanitrust::marketplace_tato_tests {
                 string::utf8(b"Organic Rice"),
                 PRODUCT_PRICE,
                 PRODUCT_STOCK,
+                DEADLINE_HOURS,
                 ts::ctx(&mut scenario)
             );
         };
@@ -219,6 +223,7 @@ module tanitrust::marketplace_tato_tests {
                 string::utf8(b"Organic Rice"),
                 PRODUCT_PRICE,
                 PRODUCT_STOCK,
+                DEADLINE_HOURS,
                 ts::ctx(&mut scenario)
             );
         };
@@ -230,6 +235,7 @@ module tanitrust::marketplace_tato_tests {
                 string::utf8(b"Organic Corn"),
                 PRODUCT_PRICE * 2,
                 PRODUCT_STOCK / 2,
+                DEADLINE_HOURS,
                 ts::ctx(&mut scenario)
             );
         };
@@ -238,7 +244,7 @@ module tanitrust::marketplace_tato_tests {
         ts::next_tx(&mut scenario, FARMER);
         {
             let product1 = ts::take_shared<Product>(&scenario);
-            let (name, _, _, _) = marketplace::get_product_info(&product1);
+            let (name, _, _, _, _) = marketplace::get_product_info(&product1);
             
             // Make sure we're deleting the Rice product
             if (name == string::utf8(b"Organic Rice")) {
@@ -252,7 +258,7 @@ module tanitrust::marketplace_tato_tests {
         ts::next_tx(&mut scenario, FARMER);
         {
             let product2 = ts::take_shared<Product>(&scenario);
-            let (name, price, stock, farmer) = marketplace::get_product_info(&product2);
+            let (name, price, stock, farmer, _) = marketplace::get_product_info(&product2);
             
             // Should be the Corn product
             assert!(name == string::utf8(b"Organic Corn") || name == string::utf8(b"Organic Rice"), 0);
@@ -285,6 +291,7 @@ module tanitrust::marketplace_tato_tests {
                 string::utf8(b"Rice"),
                 PRODUCT_PRICE,
                 PRODUCT_STOCK,
+                DEADLINE_HOURS,
                 ts::ctx(&mut scenario)
             );
         };
@@ -303,13 +310,12 @@ module tanitrust::marketplace_tato_tests {
             marketplace::create_order(
                 &mut product,
                 ORDER_QUANTITY,
-                DEADLINE_HOURS,
                 payment,
                 &clock,
                 ts::ctx(&mut scenario)
             );
             
-            let (_, _, stock, _) = marketplace::get_product_info(&product);
+            let (_, _, stock, _, _) = marketplace::get_product_info(&product);
             assert!(stock == PRODUCT_STOCK - ORDER_QUANTITY, 0);
             
             ts::return_shared(product);
@@ -343,6 +349,7 @@ module tanitrust::marketplace_tato_tests {
                 string::utf8(b"Rice"),
                 PRODUCT_PRICE,
                 PRODUCT_STOCK,
+                DEADLINE_HOURS,
                 ts::ctx(&mut scenario)
             );
         };
@@ -359,7 +366,6 @@ module tanitrust::marketplace_tato_tests {
             marketplace::create_order(
                 &mut product,
                 ORDER_QUANTITY, // Ordering 10 units
-                DEADLINE_HOURS,
                 payment, // But only paid for 1 unit!
                 &clock,
                 ts::ctx(&mut scenario)
@@ -392,6 +398,7 @@ module tanitrust::marketplace_tato_tests {
                 string::utf8(b"Rice"),
                 PRODUCT_PRICE,
                 PRODUCT_STOCK,
+                DEADLINE_HOURS,
                 ts::ctx(&mut scenario)
             );
         };
@@ -408,7 +415,6 @@ module tanitrust::marketplace_tato_tests {
             marketplace::create_order(
                 &mut product,
                 ORDER_QUANTITY,
-                DEADLINE_HOURS,
                 payment,
                 &clock,
                 ts::ctx(&mut scenario)
@@ -461,6 +467,7 @@ module tanitrust::marketplace_tato_tests {
                 string::utf8(b"Rice"),
                 PRODUCT_PRICE,
                 PRODUCT_STOCK,
+                DEADLINE_HOURS,
                 ts::ctx(&mut scenario)
             );
         };
@@ -477,7 +484,6 @@ module tanitrust::marketplace_tato_tests {
             marketplace::create_order(
                 &mut product,
                 ORDER_QUANTITY,
-                DEADLINE_HOURS,
                 payment,
                 &clock,
                 ts::ctx(&mut scenario)
@@ -539,6 +545,7 @@ module tanitrust::marketplace_tato_tests {
                 string::utf8(b"Rice"),
                 PRODUCT_PRICE,
                 PRODUCT_STOCK,
+                DEADLINE_HOURS,
                 ts::ctx(&mut scenario)
             );
         };
@@ -555,7 +562,6 @@ module tanitrust::marketplace_tato_tests {
             marketplace::create_order(
                 &mut product,
                 ORDER_QUANTITY,
-                DEADLINE_HOURS,
                 payment,
                 &clock,
                 ts::ctx(&mut scenario)
@@ -631,6 +637,7 @@ module tanitrust::marketplace_tato_tests {
                 string::utf8(b"Premium Rice"),
                 100_000_000, // 1 TATO per unit
                 100,
+                24, // 24 hours fulfillment time
                 ts::ctx(&mut scenario)
             );
         };
@@ -656,7 +663,6 @@ module tanitrust::marketplace_tato_tests {
             marketplace::create_order(
                 &mut product,
                 5,
-                24,
                 payment,
                 &clock,
                 ts::ctx(&mut scenario)

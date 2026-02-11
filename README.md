@@ -49,6 +49,7 @@ tx.moveCall({
     tx.pure('Organic Rice'),    // name
     tx.pure(50000000),          // price (0.5 TATO)
     tx.pure(1000),              // stock
+    tx.pure(24),                // fulfillment_time (in hours) <-- NEW!
   ],
 });
 ```
@@ -79,7 +80,7 @@ tx.moveCall({
   arguments: [
     tx.object(productId),
     tx.pure(10),                // quantity
-    tx.pure(72),                // deadline_hours
+    // deadline_hours removed - auto calculated from product.fulfillment_time
     coin,                       // payment
     tx.object('0x6'),           // clock
   ],
@@ -110,7 +111,7 @@ tx.moveCall({
   target: `${PACKAGE_ID}::marketplace::create_dispute`,
   arguments: [tx.object(orderId)],
 });
-// Note: Dispute is now a SHARED object
+// Note: Dispute is a SHARED object
 ```
 
 #### Propose Compensation
@@ -140,7 +141,7 @@ tx.moveCall({
 
 ```typescript
 // Get product info
-marketplace::get_product_info(product): (name, price, stock, farmer)
+marketplace::get_product_info(product): (name, price, stock, farmer, fulfillment_time)
 
 // Get order details
 marketplace::get_order_details(order): (buyer, farmer, quantity, total_price, deadline, status)
