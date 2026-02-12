@@ -9,9 +9,9 @@ Decentralized Agricultural Marketplace on Sui using **TATO tokens**.
 ```typescript
 export const TANITRUST_CONFIG = {
   NETWORK: 'testnet',
-  PACKAGE_ID: '0x49baa0988a11ca9c4e40216b826fd19d86af3f427459408a6720e7c6fad2bd15',
-  TREASURY_CAP_HOLDER: '0xe0857d41cb5e88091fca3fd22ba3e333746950cbe7bbbb1f7870db502d725b9f',
-  TATO_COIN_TYPE: '0x49baa0988a11ca9c4e40216b826fd19d86af3f427459408a6720e7c6fad2bd15::tani_token::TANI_TOKEN',
+  PACKAGE_ID: '0x6272050be22ceec12d8684b5d2a72184f7da10149734cac1796945e1bd76e8d1',
+  TREASURY_CAP_HOLDER: '0xbf62fde77a9243d28832fd2e5356e1b531a30b4c581a44515476851523bae90b',
+  TATO_COIN_TYPE: '0x6272050be22ceec12d8684b5d2a72184f7da10149734cac1796945e1bd76e8d1::tani_token::TANI_TOKEN',
   CLOCK_OBJECT: '0x6', // Sui system clock
 };
 ```
@@ -165,4 +165,4 @@ sui move test
 
 ## 🔗 Explorer
 
-[View on Sui Explorer](https://suiexplorer.com/object/0x49baa0988a11ca9c4e40216b826fd19d86af3f427459408a6720e7c6fad2bd15?network=testnet)
+[View on Sui Explorer](https://suiexplorer.com/object/0x6272050be22ceec12d8684b5d2a72184f7da10149734cac1796945e1bd76e8d1?network=testnet)
